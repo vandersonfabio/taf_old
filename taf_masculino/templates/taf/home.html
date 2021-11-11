@@ -1,0 +1,125 @@
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.11/jquery.mask.min.js"></script>
+
+{% load static %}
+
+<title>Calculadora TAF | PMRN</title>
+<link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+<div class="container">
+    <h3 class="alert alert-warning text-center">CALCULADORA TAF (Masculino)</h3>
+    <br>
+    <form action="{% url 'resultado' %}" autocomplete="off">
+        <div class="form-group">
+            <label for="idade_input">Idade</label>
+            <select class="form-control faixa_etaria" id="idade_input" name="idade_input">
+              <option value="24">18 a 24 anos</option>
+              <option value="29">25 a 29 anos</option>
+              <option value="34">30 a 34 anos</option>
+              <option value="39">35 a 39 anos</option>
+              <option value="44">40 a 44 anos</option>
+              <option value="49">45 a 49 anos</option>
+              <option value="50">50 anos ou mais</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="tempo_corrida_input">Tempo corrida (2.400m)</label>
+            <input type="text" class="form-control corrida" id="tempo_corrida_input" name="tempo_corrida_input" placeholder="Insira seu tempo na corrida de 2.400m">
+        </div>
+        <div class="form-group">
+            <label for="tempo_shuttle_input">Tempo Shuttle Run</label>
+            <input type="text" class="form-control shuttle" id="tempo_shuttle_input" name="tempo_shuttle_input" placeholder="Insira seu tempo no shuttle run">
+        </div>
+        <div class="form-group">
+            <label for="n_flexoes_barra_input">Flexões na barra</label>
+            <input type="text" class="form-control f_barra" id="n_flexoes_barra_input" name="n_flexoes_barra_input" placeholder="Insira o nº de flexões na barra">
+        </div>
+        <div class="form-group">
+            <label for="n_flexoes_solo_input">Flexões no solo</label>
+            <input type="text" class="form-control f_solo" id="n_flexoes_solo_input" name="n_flexoes_solo_input" placeholder="Insira o nº de flexões no solo">
+        </div>
+        <div class="form-group">
+            <label for="n_abdominais_input">Abdominais</label>
+            <input type="text" class="form-control" id="n_abdominais_input" name="n_abdominais_input" placeholder="Insira o nº de abdominais">
+        </div>
+            <input type="submit" value="Calcular" class="btn btn-info">
+        </div>
+    </form>    
+</div>
+
+
+<script type="text/javascript">    
+
+    var behavior_corrida = function (val) {
+    return val.replace(/\D/g, '').length === 4 ? '00:00' : '0:009';
+    },
+    options = {
+        onKeyPress: function (val, e, field, options) {
+            field.mask(behavior.apply({}, arguments), options);
+        }
+    };
+
+    var behavior_shuttle = function (val) {
+    return val.replace(/\D/g, '').length === 3 ? '00.0' : '0.09';
+    },
+    options = {
+        onKeyPress: function (val, e, field, options) {
+            field.mask(behavior.apply({}, arguments), options);
+        }
+    };
+
+    $('.corrida').mask(behavior_corrida, options);
+    $('.shuttle').mask(behavior_shuttle, options);
+
+    $("select.faixa_etaria").change(function(){
+        var idade = $(this).children("option:selected").val();
+
+        if(idade == 50){
+            $(".shuttle").val('')
+            $(".f_barra").val('')          
+            $(".shuttle").prop('disabled', true);
+            $(".f_barra").prop('disabled', true);
+
+            alert("Os avaliados com idade igual ou superior a 50 (cinquenta) anos deverão executar obrigatoriamente a corrida de 2400 m, a flexão de braço sobre o solo e o abdominal tipo remador.");
+        }
+        else if(idade > 34){
+            alert("Os avaliados com idade igual ou superior a 35 (trinta e cinco) anos até a idade igual ou " +
+                    "inferior a 49 (quarenta e nove) anos, poderão optar pela execução da flexão de braço no solo ou na "+
+                    "barra fixa (masculino) / contração isométrica na barra fixa (feminino), sendo vetada a execução das "+
+                    "duas atividades para este grupo. Executam os demais exercícios: a corrida de 2400 m, o teste de shutlle "+
+                    "run e o abdominal tipo remador.");
+            $(".shuttle").prop('disabled', false);
+            $(".f_barra").prop('disabled', false);
+            $(".f_solo").prop('disabled', false);
+
+
+            $(".f_barra").focusout(function(){
+                var reps_flexao_barra = $(".f_barra").val();
+                if(reps_flexao_barra != 0){
+                    $(".f_solo").val('')
+                    $(".f_solo").prop('disabled', true);
+                }
+                else{
+                    $(".f_solo").prop('disabled', false);
+                }            
+            });
+
+            $(".f_solo").focusout(function(){
+                var reps_flexao_solo = $(".f_solo").val();
+                if(reps_flexao_solo != 0){
+                    $(".f_barra").val('')
+                    $(".f_barra").prop('disabled', true);
+                }
+                else{
+                    $(".f_barra").prop('disabled', false);
+                }            
+            });         
+        }
+        else{
+            $(".shuttle").prop('disabled', false);
+            $(".f_barra").prop('disabled', false);
+            $(".f_solo").prop('disabled', false);
+        }
+        
+    });
+</script>
